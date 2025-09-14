@@ -1,0 +1,20 @@
+{
+  "name": "CKAD Minikube Env",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "runArgs": [
+    "--privileged"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "redhat.vscode-yaml"
+      ]
+    }
+  },
+  "postCreateCommand": "bash /workspaces/$(basename $(pwd))/scripts/start-minikube.sh"
+}

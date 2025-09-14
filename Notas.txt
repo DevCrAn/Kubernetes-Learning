@@ -1,0 +1,25 @@
+Comando esenciales en caso de fallo
+
+
+
+Detener el cluster
+minikube stop 
+
+
+Eliminar el cluster (SOLO HACERLO EN CASO DE EMERGECIA
+
+minikube delete
+
+Inicializamos nuevamente de forma manual o con el script en bash
+
+minikube start --driver=docker --kubernetes-version=v1.33.0
+
+Eliminar el contedor 
+
+docker rm + id
+
+al levantar el cluster ejecutamos si es necesario:
+
+alias k=kubectl
+
+
