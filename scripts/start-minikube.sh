@@ -14,7 +14,5 @@ kubectl wait --for=condition=Available --timeout=90s deployment/kube-apiserver -
 echo 'alias k=kubectl' >> ~/.bashrc
 source ~/.bashrc
 
-c
-
 echo "Minikube iniciado correctamente con Kubernetes v.1.33.0"
 
