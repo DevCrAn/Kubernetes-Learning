@@ -23,3 +23,35 @@ al levantar el cluster ejecutamos si es necesario:
 alias k=kubectl
 
 
+Comandos utiles para practicar
+
+1. Obtener el contexto actual del cluster
+
+kubectl config get-contexts
+
+2. Para saber en que namespace estoy
+
+kubectl config view --minify | grep namespace
+
+3. Cambiar de namespace
+
+kubectl config set-context --current --namespace=<nombre-namespace>
+
+4. Ejecutar un comando en un namespace pero sin Cambiar
+
+kubectl get pods --namespace development
+
+  O
+
+kubectl get pods -n development
+
+
+# 5. Crear el namespace (lo hiciste perfecto)
+kubectl create ns dev
+
+# 6. Crear el Deployment en el namespace 'dev'
+# (Añadir -n dev es una alternativa a cambiar el contexto)
+kubectl create deployment nginx-deployment --image=nginx:1.25 --replicas=2 --port=80 -n dev
+
+# 7. Exponer el Deployment con un Service, especificando el nombre correcto
+kubectl expose deployment nginx-deployment --port=8080 --target-port=80 --name=nginx-service -n dev
