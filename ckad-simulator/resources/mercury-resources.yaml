@@ -1,0 +1,21 @@
+# Mercury namespace resources para el simulador CKAD
+# Question 12: Helm releases - incluyendo uno stuck en pending-install
+
+---
+# ConfigMap para simular entorno Mercury con Helm
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mercury-helm-info
+  namespace: mercury
+data:
+  info: |
+    Este namespace contiene releases de Helm.
+    El estudiante debe:
+    1. Listar los releases
+    2. Identificar el que está en pending-install
+    3. Hacer uninstall del release pendiente
+    
+    Comandos útiles:
+    - helm ls -n mercury
+    - helm uninstall <release-name> -n mercury

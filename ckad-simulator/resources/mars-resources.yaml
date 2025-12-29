@@ -1,0 +1,46 @@
+# Mars namespace resources para el simulador CKAD
+# Question 11: NetworkPolicies
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mars-web
+  namespace: mars
+  labels:
+    app: mars-web
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.19-alpine
+    ports:
+    - containerPort: 80
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mars-api
+  namespace: mars
+  labels:
+    app: mars-api
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.19-alpine
+    ports:
+    - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mars-web
+  namespace: mars
+spec:
+  selector:
+    app: mars-web
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP

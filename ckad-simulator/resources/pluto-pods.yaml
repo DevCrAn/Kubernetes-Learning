@@ -1,0 +1,18 @@
+# Pluto namespace pods para el simulador CKAD
+# Question 7: holy-api pod con 2 contenedores (más adelante se añade un 3ro)
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: holy-api
+  namespace: pluto
+spec:
+  containers:
+  - name: holy-api-container
+    image: nginx:1.19-alpine
+    ports:
+    - containerPort: 80
+  - name: sidecar
+    image: busybox:1.31
+    command: ['sh', '-c', 'while true; do echo "$(date) sidecar running"; sleep 5; done']

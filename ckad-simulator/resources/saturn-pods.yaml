@@ -1,0 +1,94 @@
+# Saturn namespace pods para el simulador CKAD
+# Question 4: 6 pods webserver, uno tiene la anotación "my-happy-shop"
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webserver-sat-001
+  namespace: saturn
+  labels:
+    app: webserver
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.19-alpine
+    ports:
+    - containerPort: 80
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webserver-sat-002
+  namespace: saturn
+  labels:
+    app: webserver
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.19-alpine
+    ports:
+    - containerPort: 80
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webserver-sat-003
+  namespace: saturn
+  labels:
+    app: webserver
+  annotations:
+    description: "my-happy-shop"
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.19-alpine
+    ports:
+    - containerPort: 80
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webserver-sat-004
+  namespace: saturn
+  labels:
+    app: webserver
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.19-alpine
+    ports:
+    - containerPort: 80
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webserver-sat-005
+  namespace: saturn
+  labels:
+    app: webserver
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.19-alpine
+    ports:
+    - containerPort: 80
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: webserver-sat-006
+  namespace: saturn
+  labels:
+    app: webserver
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.19-alpine
+    ports:
+    - containerPort: 80

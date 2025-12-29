@@ -1,0 +1,97 @@
+# Earth namespace resources para el simulador CKAD
+# Question 6: earth-3cc-web deployment con readinessProbe ROTA (puerto 82 en vez de 80)
+# Question 13: server-am-1 pod
+
+---
+# Deployment con readinessProbe rota - el estudiante debe arreglarla
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: earth-3cc-web
+  namespace: earth
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: earth-3cc-web
+  template:
+    metadata:
+      labels:
+        app: earth-3cc-web
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.19-alpine
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 82  # INTENCIONAL: Puerto incorrecto, debería ser 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: earth-3cc-web
+  namespace: earth
+spec:
+  selector:
+    app: earth-3cc-web
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
+
+---
+# Pod para Question 13
+apiVersion: v1
+kind: Pod
+metadata:
+  name: server-am-1
+  namespace: earth
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.19-alpine
+    ports:
+    - containerPort: 80
+
+---
+# Question 9: earth-2x3-api deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: earth-2x3-api
+  namespace: earth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: earth-2x3-api
+  template:
+    metadata:
+      labels:
+        app: earth-2x3-api
+    spec:
+      containers:
+      - name: api
+        image: nginx:1.19-alpine
+        ports:
+        - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: earth-2x3-api
+  namespace: earth
+spec:
+  selector:
+    app: earth-2x3-api
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP

@@ -1,0 +1,40 @@
+# Neptune namespace resources para el simulador CKAD
+# Question 14: api-new-c32 deployment con 5 revisiones, rev 4 tiene ImagePullBackOff
+
+---
+# Deployment con revision history - revision 4 fallida
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-new-c32
+  namespace: neptune
+  annotations:
+    kubernetes.io/change-cause: "revision 5 - current stable"
+spec:
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: api-new-c32
+  template:
+    metadata:
+      labels:
+        app: api-new-c32
+    spec:
+      containers:
+      - name: api
+        image: nginx:1.19-alpine
+        ports:
+        - containerPort: 80
+
+---
+# ConfigMap para neptune
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: neptune-config
+  namespace: neptune
+data:
+  api.config: |
+    server.port=8080
+    debug.enabled=true

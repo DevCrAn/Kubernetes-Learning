@@ -1,0 +1,23 @@
+# Template para project-23-api
+# Question 15: El estudiante debe modificar este deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-23-api
+  namespace: pluto
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: project-23-api
+  template:
+    metadata:
+      labels:
+        app: project-23-api
+    spec:
+      containers:
+      - name: c1
+        image: nginx:1.19-alpine
+        ports:
+        - containerPort: 80

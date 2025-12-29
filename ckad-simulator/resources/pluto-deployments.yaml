@@ -1,0 +1,38 @@
+# Pluto namespace deployments para el simulador CKAD
+# Question 15: project-23-api deployment
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-23-api
+  namespace: pluto
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: project-23-api
+  template:
+    metadata:
+      labels:
+        app: project-23-api
+    spec:
+      containers:
+      - name: api
+        image: nginx:1.19-alpine
+        ports:
+        - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: project-23-api
+  namespace: pluto
+spec:
+  selector:
+    app: project-23-api
+  ports:
+  - port: 3333
+    targetPort: 80
+  type: ClusterIP
