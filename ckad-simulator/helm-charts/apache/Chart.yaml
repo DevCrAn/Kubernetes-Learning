@@ -1,0 +1,6 @@
+apiVersion: v2
+name: apache
+description: A minimal Apache Helm chart for CKAD practice
+type: application
+version: 0.1.0
+appVersion: "2.4.41"

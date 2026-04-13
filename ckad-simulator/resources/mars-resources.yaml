@@ -1,46 +1,40 @@
-# Mars namespace resources para el simulador CKAD
-# Question 11: NetworkPolicies
+# Mars namespace resources for CKAD Simulator
+# Question 18: Service misconfiguration - manager-api-svc with WRONG selector
 
 ---
-apiVersion: v1
-kind: Pod
+# Q18: Deployment manager-api-deployment
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: mars-web
+  name: manager-api-deployment
   namespace: mars
-  labels:
-    app: mars-web
 spec:
-  containers:
-  - name: nginx
-    image: nginx:1.19-alpine
-    ports:
-    - containerPort: 80
+  replicas: 1
+  selector:
+    matchLabels:
+      app: manager-api
+  template:
+    metadata:
+      labels:
+        app: manager-api
+    spec:
+      containers:
+      - name: manager-api
+        image: nginx:1.17.3-alpine
+        ports:
+        - containerPort: 80
 
 ---
-apiVersion: v1
-kind: Pod
-metadata:
-  name: mars-api
-  namespace: mars
-  labels:
-    app: mars-api
-spec:
-  containers:
-  - name: nginx
-    image: nginx:1.19-alpine
-    ports:
-    - containerPort: 80
-
----
+# Q18: Service with INTENTIONALLY WRONG selector (manager-api-WRONG instead of manager-api)
 apiVersion: v1
 kind: Service
 metadata:
-  name: mars-web
+  name: manager-api-svc
   namespace: mars
 spec:
   selector:
-    app: mars-web
+    app: manager-api-WRONG
   ports:
-  - port: 80
+  - port: 4444
     targetPort: 80
   type: ClusterIP

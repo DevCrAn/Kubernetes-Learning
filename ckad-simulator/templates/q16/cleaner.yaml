@@ -1,9 +1,6 @@
-# Mercury namespace resources for CKAD Simulator
-# Question 4: Helm releases (setup via helm commands in setup-ckad-env.sh)
-# Question 16: cleaner Deployment with logging sidecar exercise
-
----
-# Q16: cleaner Deployment - student must add a sidecar container
+# Template: cleaner Deployment
+# This file is copied to /opt/course/16/cleaner.yaml during setup
+# Q16: Student must add a sidecar container to this Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:

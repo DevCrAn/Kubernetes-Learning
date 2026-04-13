@@ -1,27 +1,40 @@
-# Jupiter namespace resources para el simulador CKAD
-# Question 19: Jobs y CronJobs
+# Jupiter namespace resources for CKAD Simulator
+# Question 19: jupiter-crew-deploy Deployment and jupiter-crew-svc ClusterIP Service
 
 ---
-apiVersion: v1
-kind: ConfigMap
+# Q19: Apache Deployment
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: jupiter-config
+  name: jupiter-crew-deploy
   namespace: jupiter
-data:
-  config.txt: |
-    jupiter-config-data
-
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: jupiter-pod-1
-  namespace: jupiter
-  labels:
-    app: jupiter-app
 spec:
-  containers:
-  - name: nginx
-    image: nginx:1.19-alpine
-    ports:
-    - containerPort: 80
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupiter-crew
+  template:
+    metadata:
+      labels:
+        app: jupiter-crew
+    spec:
+      containers:
+      - name: httpd
+        image: httpd:2.4.41-alpine
+        ports:
+        - containerPort: 80
+
+---
+# Q19: ClusterIP Service (student must change to NodePort 30100)
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupiter-crew-svc
+  namespace: jupiter
+spec:
+  selector:
+    app: jupiter-crew
+  ports:
+  - port: 8080
+    targetPort: 80
+  type: ClusterIP

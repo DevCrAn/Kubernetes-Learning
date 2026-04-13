@@ -1,4 +1,4 @@
-# CKAD Tips - Kubernetes 1.34
+# CKAD Tips - Kubernetes 1.35
 
 En esta sección proporcionaremos algunos consejos sobre cómo manejar el examen CKAD y la terminal del navegador.
 

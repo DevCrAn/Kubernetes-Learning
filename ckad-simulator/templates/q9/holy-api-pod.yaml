@@ -1,0 +1,16 @@
+# Template: holy-api Pod
+# This file is copied to /opt/course/9/holy-api-pod.yaml during setup
+# Q9: Student must convert this Pod to a Deployment with 3 replicas
+apiVersion: v1
+kind: Pod
+metadata:
+  name: holy-api
+  namespace: pluto
+  labels:
+    app: holy-api
+spec:
+  containers:
+  - name: holy-api-container
+    image: nginx:1.17.3-alpine
+    ports:
+    - containerPort: 80

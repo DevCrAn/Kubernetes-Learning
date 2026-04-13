@@ -1,0 +1,29 @@
+# Template: test-init-container Deployment
+# This file is copied to /opt/course/17/test-init-container.yaml during setup
+# Q17: Student must add an InitContainer to create index.html
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-init-container
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-init-container
+  template:
+    metadata:
+      labels:
+        app: test-init-container
+    spec:
+      volumes:
+      - name: web-content
+        emptyDir: {}
+      containers:
+      - name: nginx
+        image: nginx:1.17.3-alpine
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: web-content
+          mountPath: /usr/share/nginx/html

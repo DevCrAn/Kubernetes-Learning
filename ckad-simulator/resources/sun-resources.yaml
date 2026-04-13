@@ -1,5 +1,6 @@
-# Sun namespace resources para el simulador CKAD
-# Question 16, 17, 18: varios pods
+# Sun namespace resources for CKAD Simulator
+# Question 22: Pods with type: worker/runner labels for labeling exercise
+# Preview Q2: Deployment and ServiceAccount
 
 ---
 apiVersion: v1
@@ -9,10 +10,11 @@ metadata:
   namespace: sun
   labels:
     app: sun-app
+    type: worker
 spec:
   containers:
   - name: nginx
-    image: nginx:1.19-alpine
+    image: nginx:1.17.3-alpine
     ports:
     - containerPort: 80
 
@@ -24,15 +26,64 @@ metadata:
   namespace: sun
   labels:
     app: sun-app
+    type: runner
 spec:
   containers:
   - name: nginx
-    image: nginx:1.19-alpine
+    image: nginx:1.17.3-alpine
     ports:
     - containerPort: 80
 
 ---
-# Question 18: Deployment con ServiceAccount específico
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sun-pod-0025
+  namespace: sun
+  labels:
+    app: sun-app
+    type: other
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.17.3-alpine
+    ports:
+    - containerPort: 80
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sun-pod-0026
+  namespace: sun
+  labels:
+    app: sun-app
+    type: worker
+spec:
+  containers:
+  - name: httpd
+    image: httpd:2.4.41-alpine
+    ports:
+    - containerPort: 80
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sun-pod-0027
+  namespace: sun
+  labels:
+    app: sun-app
+    type: runner
+spec:
+  containers:
+  - name: httpd
+    image: httpd:2.4.41-alpine
+    ports:
+    - containerPort: 80
+
+---
+# Preview Q2: Deployment with ServiceAccount (used by sa-sun-deploy)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -51,6 +102,6 @@ spec:
       serviceAccountName: sa-sun-deploy
       containers:
       - name: nginx
-        image: nginx:1.19-alpine
+        image: nginx:1.17.3-alpine
         ports:
         - containerPort: 80

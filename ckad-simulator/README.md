@@ -1,138 +1,79 @@
 # CKAD Simulator Practice Environment
 
-Este directorio contiene scripts y recursos para practicar las preguntas del simulador CKAD de Killer.sh.
+Complete CKAD exam simulator with 25 questions, 2-hour timer, and automatic answer evaluation.
 
-## 📋 Contenido
+## Quick Start
 
-```
-ckad-simulator/
-├── setup-ckad-env.sh      # Script principal para configurar el entorno
-├── cleanup-ckad-env.sh    # Script para limpiar el entorno
-├── README.md              # Este archivo
-└── resources/             # Archivos YAML con los recursos de K8s
-    ├── serviceaccounts.yaml
-    ├── secrets.yaml
-    ├── saturn-pods.yaml
-    ├── pluto-pods.yaml
-    ├── pluto-deployments.yaml
-    ├── earth-resources.yaml
-    ├── neptune-resources.yaml
-    ├── sun-resources.yaml
-    ├── mercury-resources.yaml
-    ├── mars-resources.yaml
-    ├── jupiter-resources.yaml
-    └── project-23-api.yaml
-```
-
-## 🚀 Uso Rápido
-
-### 1. Iniciar Minikube (si no está corriendo)
 ```bash
-minikube start
-```
-
-### 2. Configurar el entorno de práctica
-```bash
-chmod +x setup-ckad-env.sh cleanup-ckad-env.sh
+# 1. Setup (run once after Minikube is ready)
 ./setup-ckad-env.sh
-```
-
-### 3. Cargar alias del examen
-```bash
 source ~/.ckad-env
+
+# 2. Start exam
+./exam-runner.sh start
+
+# 3. Solve questions (open questions-en.md or questions-es.md)
+
+# 4. Check answers
+./exam-runner.sh evaluate
+
+# 5. End exam
+./exam-runner.sh end
+
+# 6. Reset for retry
+./cleanup-ckad-env.sh && ./setup-ckad-env.sh
 ```
 
-### 4. Practicar las preguntas
-Abre el archivo `Killer Shell - Exam Simulators.html` en tu navegador y resuelve las preguntas.
+## What the Setup Creates
 
-### 5. Limpiar y empezar de nuevo
+### Namespaces
+| Namespace | Questions | Description |
+|-----------|-----------|-------------|
+| `earth` | Q12, PQ3 | PV/PVC exercises, broken readinessProbe |
+| `jupiter` | Q19 | ClusterIP to NodePort conversion |
+| `mars` | Q18 | Service misconfiguration |
+| `mercury` | Q4, Q16 | Helm releases, sidecar logging |
+| `moon` | Q13-Q15 | StorageClass, Secrets, ConfigMaps |
+| `neptune` | Q3, Q5, Q7-Q8, Q21 | Jobs, ServiceAccounts, rollouts |
+| `pluto` | Q9-Q10, PQ1 | Pod→Deployment, Services, probes |
+| `saturn` | Q7 | Pod migration source |
+| `sun` | Q22, PQ2 | Labels/annotations, Deployments |
+| `venus` | Q20 | NetworkPolicy |
+
+### Template Files (in /opt/course/)
+| Path | Question | Content |
+|------|----------|---------|
+| `/opt/course/9/holy-api-pod.yaml` | Q9 | Pod template to convert to Deployment |
+| `/opt/course/11/image/` | Q11 | Dockerfile + Go source for container build |
+| `/opt/course/14/secret-handler.yaml` | Q14 | Pod template for Secret exercise |
+| `/opt/course/14/secret2.yaml` | Q14 | Secret YAML to create and mount |
+| `/opt/course/15/web-moon.html` | Q15 | HTML content for ConfigMap |
+| `/opt/course/16/cleaner.yaml` | Q16 | Deployment template for sidecar |
+| `/opt/course/17/test-init-container.yaml` | Q17 | Deployment template for InitContainer |
+| `/opt/course/p1/project-23-api.yaml` | PQ1 | Deployment template for liveness probe |
+
+### Helm Setup (Q4)
+- Local `killershell` Helm repo at `http://localhost:8879`
+- Release `internal-issue-report-apiv1` (nginx) → student must DELETE
+- Release `internal-issue-report-apiv2` (nginx v0.1.0) → student must UPGRADE
+- Release `internal-issue-report-daniel` (broken) → student must FIND and DELETE
+- Charts available: `killershell/nginx` (0.1.0, 0.2.0), `killershell/apache` (0.1.0)
+
+### Docker Registry (Q11)
+- Local registry at `registry.killer.sh:5000`
+- Used for building and pushing container images
+
+## Environment Variables
 ```bash
-./cleanup-ckad-env.sh
-./setup-ckad-env.sh
+alias k=kubectl                        # Short kubectl
+alias kn='kubectl config set-context --current --namespace'
+export do="--dry-run=client -o yaml"   # Dry-run shortcut
+export now="--force --grace-period 0"  # Force delete shortcut
 ```
 
-## 🌍 Namespaces Creados
+## Important Notes
 
-El script crea los siguientes namespaces que se usan en las preguntas:
-
-| Namespace | Descripción |
-|-----------|-------------|
-| `earth` | Deployments con readinessProbe, services |
-| `jupiter` | Jobs y CronJobs |
-| `mars` | NetworkPolicies |
-| `mercury` | Helm releases |
-| `neptune` | ServiceAccounts, Secrets, Rollouts |
-| `pluto` | Pods multi-container, Deployments |
-| `saturn` | Pods webserver con annotations |
-| `sun` | Pods y Deployments con ServiceAccounts |
-| `shell-intern` | Namespace para ejercicios de shell |
-
-## 📝 Recursos Pre-existentes
-
-El script crea los siguientes recursos que ya existen en las preguntas del simulador:
-
-### Saturn
-- 6 pods `webserver-sat-001` a `webserver-sat-006`
-- Uno de ellos tiene la anotación `description: "my-happy-shop"`
-
-### Neptune
-- ServiceAccount `neptune-sa-v2`
-- Secret `neptune-secret-1`
-- Deployment `api-new-c32` con historial de revisiones
-
-### Earth
-- Deployment `earth-3cc-web` con **readinessProbe ROTA** (puerto 82 en vez de 80)
-- Deployment `earth-2x3-api`
-- Services correspondientes
-
-### Pluto
-- Pod `holy-api` con 2 containers
-- Deployment `project-23-api`
-
-### Sun
-- Pods `sun-pod-0023` y `sun-pod-0024`
-- Deployment `sun-deploy` con ServiceAccount específico
-
-### Mars
-- Pods `mars-web` y `mars-api` para practicar NetworkPolicies
-
-## 🔧 Alias Disponibles
-
-Después de ejecutar `source ~/.ckad-env`:
-
-| Alias/Variable | Valor | Uso |
-|----------------|-------|-----|
-| `k` | `kubectl` | Atajo para kubectl |
-| `kn <namespace>` | Cambiar namespace | `kn neptune` |
-| `$do` | `--dry-run=client -o yaml` | `k run pod --image=nginx $do > pod.yaml` |
-| `$now` | `--force --grace-period 0` | `k delete pod mypod $now` |
-
-## 📁 Estructura de Directorios
-
-El script crea los siguientes directorios para guardar tus respuestas:
-- `/opt/course/1` a `/opt/course/22` - Para las 22 preguntas regulares
-- `/opt/course/p1` y `/opt/course/p2` - Para las Preview Questions
-
-## ⚠️ Notas Importantes
-
-1. **Helm**: Algunas preguntas requieren Helm. Asegúrate de tenerlo instalado:
-   ```bash
-   curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-   ```
-
-2. **NetworkPolicy**: Para que las NetworkPolicies funcionen, necesitas un CNI que las soporte. En Minikube:
-   ```bash
-   minikube start --cni=calico
-   ```
-
-3. **Permisos**: Es posible que necesites `sudo` para crear directorios en `/opt/course/`.
-
-## 🎯 Tips para el Examen
-
-1. **Usa los alias**: `k` es mucho más rápido que `kubectl`
-2. **Usa `$do`**: Genera YAML rápidamente y luego edítalo
-3. **Usa `$now`**: Borra pods rápidamente sin esperar
-4. **Practica `vim`**: El editor del examen es vim/nano
-5. **Conoce la documentación**: kubernetes.io/docs está permitido en el examen
-
-¡Buena suerte en tu CKAD! 🚀
+- **No SSH needed**: Unlike Killer Shell, all questions run on the same Minikube instance. Ignore the `ssh ckadXXXX` instructions.
+- **Helm repo**: The `killershell` repo is served locally. If it's not responding, restart with `./setup-ckad-env.sh`.
+- **Scoring**: The evaluator provides approximate scoring. Some edge cases may not be perfectly detected.
+- **K8s version**: Configured for 1.35 to match the current CKAD exam.
