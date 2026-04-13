@@ -1,0 +1,29 @@
+{
+  "name": "CKAD Practice Environment - K8s 1.35",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "K8S_VERSION": "v1.35.0"
+    }
+  },
+  "runArgs": [
+    "--privileged"
+  ],
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-azuretools.vscode-docker",
+        "redhat.vscode-yaml"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "postCreateCommand": "bash /workspaces/Kubernetes-Learning/scripts/start-minikube.sh",
+  "remoteUser": "vscode"
+}

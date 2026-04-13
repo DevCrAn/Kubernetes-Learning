@@ -3,7 +3,7 @@
 set -euo pipefail
 
 echo "Inicializando Minikube..."
-minikube start --driver=docker --kubernetes-version=v1.33.0
+minikube start --driver=docker --kubernetes-version=v1.35.0
 
 kubectl cluster-info || true
 
@@ -47,5 +47,5 @@ if [ -n "${PS1-}" ] && [ "$(basename -- "$SHELL")" = "bash" ]; then
 	source "$BASHRC_FILE" || true
 fi
 
-echo "Minikube iniciado correctamente con Kubernetes v1.33.0"
+echo "Minikube started successfully with Kubernetes v1.35.0"
 
