@@ -1,0 +1,701 @@
+# ============================================================================
+# CKAD 2026 Real Exam Practice - Kubernetes Resources
+# ============================================================================
+
+# --- Q1: Secrets ---
+# Deployment with hardcoded env vars (student must replace with Secret)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-server
+  namespace: ckad-secrets
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-server
+  template:
+    metadata:
+      labels:
+        app: api-server
+    spec:
+      containers:
+        - name: api
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+          env:
+            - name: DB_USER
+              value: "admin"
+            - name: DB_PASS
+              value: "S3cretP@ss!"
+
+# --- Q3: RBAC ---
+# Pod that loops trying to list pods (will fail with default SA)
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: log-collector
+  namespace: ckad-rbac
+spec:
+  containers:
+    - name: collector
+      image: bitnami/kubectl:latest
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          while true; do
+            kubectl get pods -n ckad-rbac 2>&1
+            sleep 30
+          done
+
+# --- Q4: Canary Deployment ---
+# Stable deployment (80% traffic)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-stable
+  namespace: ckad-canary
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: webapp
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: webapp
+        version: v1
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.24
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-svc
+  namespace: ckad-canary
+spec:
+  selector:
+    app: webapp
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+
+# --- Q5: NetworkPolicy ---
+# Pods with WRONG labels
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend
+  namespace: ckad-netpol
+  labels:
+    role: wrong-frontend
+spec:
+  containers:
+    - name: frontend
+      image: nginx:1.25
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: backend
+  namespace: ckad-netpol
+  labels:
+    role: wrong-backend
+spec:
+  containers:
+    - name: backend
+      image: nginx:1.25
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: database
+  namespace: ckad-netpol
+  labels:
+    role: wrong-db
+spec:
+  containers:
+    - name: database
+      image: nginx:1.25
+      ports:
+        - containerPort: 80
+# NetworkPolicies
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+  namespace: ckad-netpol
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend-to-backend
+  namespace: ckad-netpol
+spec:
+  podSelector:
+    matchLabels:
+      role: backend
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              role: frontend
+      ports:
+        - protocol: TCP
+          port: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-backend-to-db
+  namespace: ckad-netpol
+spec:
+  podSelector:
+    matchLabels:
+      role: db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              role: backend
+      ports:
+        - protocol: TCP
+          port: 80
+
+# --- Q7: Rolling Update ---
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  namespace: ckad-rollout
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.24
+          ports:
+            - containerPort: 80
+
+# --- Q8: Readiness Probe ---
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deploy
+  namespace: ckad-probes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api-deploy
+  template:
+    metadata:
+      labels:
+        app: api-deploy
+    spec:
+      containers:
+        - name: api
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+
+# --- Q9: SecurityContext ---
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-app
+  namespace: ckad-security
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secure-app
+  template:
+    metadata:
+      labels:
+        app: secure-app
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+
+# --- Q10: Ingress ---
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deploy
+  namespace: ckad-ingress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-svc
+  namespace: ckad-ingress
+spec:
+  selector:
+    app: web
+  ports:
+    - port: 8080
+      targetPort: 80
+      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-svc
+  namespace: ckad-ingress
+spec:
+  selector:
+    app: api
+  ports:
+    - port: 8080
+      targetPort: 80
+      protocol: TCP
+
+# --- Q12: ResourceQuota ---
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: ckad-quota
+spec:
+  hard:
+    limits.cpu: "2"
+    limits.memory: "4Gi"
+    requests.cpu: "1"
+    requests.memory: "2Gi"
+
+# --- Q13: Scale + NodePort ---
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deploy
+  namespace: ckad-scale
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+
+# --- Q14: Logs + Metrics ---
+# Extra pods to create CPU load for metrics question
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cpu-high
+  namespace: ckad-logs
+spec:
+  containers:
+    - name: stress
+      image: busybox:1.36
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          while true; do
+            dd if=/dev/zero of=/dev/null bs=1M count=100 2>/dev/null
+          done
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "64Mi"
+        limits:
+          cpu: "200m"
+          memory: "128Mi"
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cpu-low
+  namespace: ckad-logs
+spec:
+  containers:
+    - name: idle
+      image: busybox:1.36
+      command: ["/bin/sh", "-c", "while true; do sleep 60; done"]
+      resources:
+        requests:
+          cpu: "10m"
+          memory: "32Mi"
+        limits:
+          cpu: "50m"
+          memory: "64Mi"
+
+# --- Q15: API Deprecation ---
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deploy
+  namespace: ckad-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-deploy
+  template:
+    metadata:
+      labels:
+        app: web-deploy
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+
+# --- Q16: Rollout Resume ---
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-paused
+  namespace: ckad-resume
+spec:
+  replicas: 2
+  paused: true
+  selector:
+    matchLabels:
+      app: web-paused
+  template:
+    metadata:
+      labels:
+        app: web-paused
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.24
+          ports:
+            - containerPort: 80
+
+# ============================================================================
+# Q19: Fix Broken Pod with Correct ServiceAccount
+# (Source: aravind4799 Q04, vloidcloudtech Q04)
+# ============================================================================
+
+# ServiceAccounts
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: monitor-sa
+  namespace: ckad-sa-fix
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: wrong-sa
+  namespace: ckad-sa-fix
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-sa
+  namespace: ckad-sa-fix
+
+# Roles
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: metrics-reader
+  namespace: ckad-sa-fix
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: full-access
+  namespace: ckad-sa-fix
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: view-only
+  namespace: ckad-sa-fix
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get"]
+
+# RoleBindings - monitor-sa is bound to metrics-reader (the correct one)
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: monitor-binding
+  namespace: ckad-sa-fix
+subjects:
+  - kind: ServiceAccount
+    name: monitor-sa
+    namespace: ckad-sa-fix
+roleRef:
+  kind: Role
+  name: metrics-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: admin-binding
+  namespace: ckad-sa-fix
+subjects:
+  - kind: ServiceAccount
+    name: admin-sa
+    namespace: ckad-sa-fix
+roleRef:
+  kind: Role
+  name: full-access
+  apiGroup: rbac.authorization.k8s.io
+
+# Pod using wrong-sa (student must fix to use monitor-sa)
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: metrics-pod
+  namespace: ckad-sa-fix
+spec:
+  serviceAccountName: wrong-sa
+  containers:
+    - name: metrics
+      image: curlimages/curl:latest
+      command: ["sh", "-c"]
+      args:
+        - |
+          while true; do
+            echo "Attempting to read metrics..."
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+              --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt \
+              "https://kubernetes.default.svc/api/v1/namespaces/ckad-sa-fix/pods" 2>&1)
+            if [ "$RESPONSE" != "200" ]; then
+              echo "ERROR: Authorization failed - cannot list pods with current ServiceAccount"
+            else
+              echo "Successfully retrieved metrics"
+            fi
+            sleep 10
+          done
+
+# ============================================================================
+# Q20: Fix Service Selector
+# (Source: aravind4799 Q12, vloidcloudtech Q12, TiPunchLabs Oni Q9)
+# ============================================================================
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  namespace: ckad-svc-fix
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webapp
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: webapp
+        tier: frontend
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-svc
+  namespace: ckad-svc-fix
+spec:
+  selector:
+    app: wrongapp
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+
+# ============================================================================
+# Q22: Resource Requests/Limits from Namespace Max (LimitRange)
+# (Source: Reddit - "kubectl describe namespace dev to get the MAX")
+# ============================================================================
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: resource-limits
+  namespace: ckad-resources
+spec:
+  limits:
+    - type: Container
+      max:
+        cpu: "1"
+        memory: "1Gi"
+      default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+
+# ============================================================================
+# Q23: NetworkPolicy with Ingress AND Egress
+# (Source: Reddit - "podSelector with ingress and egress for two pods")
+# ============================================================================
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: api-pod
+  namespace: ckad-netpol2
+  labels:
+    app: api
+spec:
+  containers:
+    - name: api
+      image: nginx:1.25
+      ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: db-pod
+  namespace: ckad-netpol2
+  labels:
+    app: database
+spec:
+  containers:
+    - name: db
+      image: postgres:15-alpine
+      ports:
+        - containerPort: 5432
+      env:
+        - name: POSTGRES_HOST_AUTH_METHOD
+          value: "trust"
+
+# ============================================================================
+# Q25: Fix Deployment Exceeding ResourceQuota
+# (Source: TiPunchLabs Oni Q6, Reddit)
+# ============================================================================
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: ckad-quota-fix
+spec:
+  hard:
+    requests.cpu: "500m"
+    requests.memory: "512Mi"
+    limits.cpu: "1"
+    limits.memory: "1Gi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quota-app
+  namespace: ckad-quota-fix
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: quota-app
+  template:
+    metadata:
+      labels:
+        app: quota-app
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "400m"
+              memory: "400Mi"
+            limits:
+              cpu: "800m"
+              memory: "800Mi"

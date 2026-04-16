@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: broken-app
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: broken-app
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.25
+          ports:
+            - containerPort: 80

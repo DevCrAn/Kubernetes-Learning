@@ -36,20 +36,23 @@ usage() {
     echo "Usage: $0 <command> [options]"
     echo ""
     echo "Commands:"
-    echo "  start [--lang en|es]   Start a new exam session (2-hour timer)"
+    echo "  start [--lang en|es] [--exam ckad2026]   Start a new exam session"
     echo "  status                 Show time remaining and progress"
     echo "  timer                  Show live countdown timer"
-    echo "  evaluate               Evaluate your answers and show score"
-    echo "  end                    End exam and show final results"
+    echo "  evaluate [--exam ckad2026]  Evaluate your answers"
+    echo "  end [--exam ckad2026]      End exam and show results"
     echo "  reset                  Reset exam timer"
-    echo "  questions [--lang en|es]  Display all questions"
+    echo "  questions [--lang en|es] [--exam ckad2026]  Display questions"
+    echo ""
+    echo "Exam Sets:"
+    echo "  (default)              Original 25 Killer Shell questions"
+    echo "  --exam ckad2026        16 Real Exam questions (Reddit/community)"
     echo ""
     echo "Examples:"
-    echo "  $0 start                    # Start exam in English"
-    echo "  $0 start --lang es          # Start exam in Spanish"
-    echo "  $0 status                   # Check time remaining"
-    echo "  $0 evaluate                 # Check answers"
-    echo "  $0 end                      # End and get final score"
+    echo "  $0 start                            # Original exam in English"
+    echo "  $0 start --exam ckad2026             # CKAD 2026 exam"
+    echo "  $0 start --exam ckad2026 --lang es   # CKAD 2026 en Español"
+    echo "  $0 evaluate --exam ckad2026          # Check CKAD 2026 answers"
     echo ""
 }
 
@@ -99,9 +102,11 @@ check_exam_active() {
 
 cmd_start() {
     local lang="en"
+    local exam="default"
     while [[ $# -gt 0 ]]; do
         case $1 in
             --lang) lang="$2"; shift 2 ;;
+            --exam) exam="$2"; shift 2 ;;
             *) shift ;;
         esac
     done
@@ -126,17 +131,31 @@ cmd_start() {
 
     clear
     echo -e "${CYAN}"
-    echo "╔══════════════════════════════════════════════════════════════════╗"
-    echo "║                                                                ║"
-    echo "║                    CKAD PRACTICE EXAM                          ║"
-    echo "║              Certified Kubernetes Application Developer         ║"
-    echo "║                                                                ║"
-    echo "║         Kubernetes Version: 1.35                               ║"
-    echo "║         Duration: 2 hours                                      ║"
-    echo "║         Questions: 22 + 3 Preview = 25 total                   ║"
-    echo "║         Passing Score: 66%                                     ║"
-    echo "║                                                                ║"
-    echo "╚══════════════════════════════════════════════════════════════════╝"
+    if [[ "$exam" == "ckad2026" ]]; then
+        echo "╔══════════════════════════════════════════════════════════════════╗"
+        echo "║                                                                ║"
+        echo "║            CKAD 2026 REAL EXAM PRACTICE                        ║"
+        echo "║       Based on Reddit/Community Confirmed Topics               ║"
+        echo "║                                                                ║"
+        echo "║         Kubernetes Version: 1.35                               ║"
+        echo "║         Duration: 2 hours                                      ║"
+        echo "║         Questions: 25 (127 points)                             ║"
+        echo "║         Passing Score: 66% (84 points)                         ║"
+        echo "║                                                                ║"
+        echo "╚══════════════════════════════════════════════════════════════════╝"
+    else
+        echo "╔══════════════════════════════════════════════════════════════════╗"
+        echo "║                                                                ║"
+        echo "║                    CKAD PRACTICE EXAM                          ║"
+        echo "║              Certified Kubernetes Application Developer         ║"
+        echo "║                                                                ║"
+        echo "║         Kubernetes Version: 1.35                               ║"
+        echo "║         Duration: 2 hours                                      ║"
+        echo "║         Questions: 22 + 3 Preview = 25 total                   ║"
+        echo "║         Passing Score: 66%                                     ║"
+        echo "║                                                                ║"
+        echo "╚══════════════════════════════════════════════════════════════════╝"
+    fi
     echo -e "${NC}"
     echo ""
     echo -e "${GREEN}Exam started at: $(date '+%Y-%m-%d %H:%M:%S')${NC}"
@@ -149,10 +168,17 @@ cmd_start() {
     echo "  - Save answers to /opt/course/<question-number>/ as instructed"
     echo ""
     echo -e "${YELLOW}Quick Commands:${NC}"
-    echo "  ./exam-runner.sh status      Check time remaining"
-    echo "  ./exam-runner.sh timer       Live countdown"
-    echo "  ./exam-runner.sh evaluate    Check your answers (anytime)"
-    echo "  ./exam-runner.sh end         Finish exam and see results"
+    if [[ "$exam" == "ckad2026" ]]; then
+        echo "  ./exam-runner.sh status                    Check time remaining"
+        echo "  ./exam-runner.sh timer                     Live countdown"
+        echo "  ./exam-runner.sh evaluate --exam ckad2026  Check your answers"
+        echo "  ./exam-runner.sh end --exam ckad2026       Finish exam"
+    else
+        echo "  ./exam-runner.sh status      Check time remaining"
+        echo "  ./exam-runner.sh timer       Live countdown"
+        echo "  ./exam-runner.sh evaluate    Check your answers (anytime)"
+        echo "  ./exam-runner.sh end         Finish exam and see results"
+    fi
     echo ""
 
     local questions_file="${SCRIPT_DIR}/questions-${lang}.md"
@@ -160,12 +186,26 @@ cmd_start() {
         questions_file="${SCRIPT_DIR}/questions-en.md"
     fi
 
+    if [[ "$exam" == "ckad2026" ]]; then
+        local questions_file="${SCRIPT_DIR}/questions-ckad2026-${lang}.md"
+        if [[ ! -f "$questions_file" ]]; then
+            questions_file="${SCRIPT_DIR}/questions-ckad2026-en.md"
+        fi
+        echo -e "${CYAN}Exam: CKAD 2026 Real Exam Practice (16 questions, 82 pts)${NC}"
+    fi
+
     echo -e "${CYAN}Questions file: ${questions_file}${NC}"
     echo ""
     echo -e "${GREEN}Good luck! Your time starts NOW.${NC}"
     echo ""
-    echo "To view questions, open: questions-${lang}.md"
-    echo "Or run: ./exam-runner.sh questions --lang ${lang}"
+    if [[ "$exam" == "ckad2026" ]]; then
+        echo "To view questions, open: questions-ckad2026-${lang}.md"
+        echo "Or run: ./exam-runner.sh questions --exam ckad2026 --lang ${lang}"
+        echo "To evaluate: ./exam-runner.sh evaluate --exam ckad2026"
+    else
+        echo "To view questions, open: questions-${lang}.md"
+        echo "Or run: ./exam-runner.sh questions --lang ${lang}"
+    fi
     echo ""
 }
 
@@ -255,17 +295,39 @@ cmd_timer() {
 }
 
 cmd_evaluate() {
-    echo ""
-    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗"
-    echo "║              CKAD EXAM - ANSWER EVALUATION                    ║"
-    echo "╚══════════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
+    local exam="default"
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --exam) exam="$2"; shift 2 ;;
+            *) shift ;;
+        esac
+    done
 
-    # Run the evaluator script
-    bash "${SCRIPT_DIR}/exam-evaluator.sh"
+    echo ""
+    if [[ "$exam" == "ckad2026" ]]; then
+        echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗"
+        echo "║         CKAD 2026 Real Exam - ANSWER EVALUATION              ║"
+        echo "╚══════════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+        bash "${SCRIPT_DIR}/exam-evaluator-2026.sh"
+    else
+        echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗"
+        echo "║              CKAD EXAM - ANSWER EVALUATION                    ║"
+        echo "╚══════════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+        bash "${SCRIPT_DIR}/exam-evaluator.sh"
+    fi
 }
 
 cmd_end() {
+    local exam="default"
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --exam) exam="$2"; shift 2 ;;
+            *) shift ;;
+        esac
+    done
+
     local remaining
     remaining=$(get_remaining_time)
 
@@ -297,7 +359,7 @@ cmd_end() {
     echo ""
 
     # Run evaluation
-    cmd_evaluate
+    cmd_evaluate --exam "$exam"
 
     # Remove timer
     rm -f "$EXAM_START_FILE"
@@ -310,14 +372,21 @@ cmd_reset() {
 
 cmd_questions() {
     local lang="en"
+    local exam="default"
     while [[ $# -gt 0 ]]; do
         case $1 in
             --lang) lang="$2"; shift 2 ;;
+            --exam) exam="$2"; shift 2 ;;
             *) shift ;;
         esac
     done
 
-    local questions_file="${SCRIPT_DIR}/questions-${lang}.md"
+    local questions_file
+    if [[ "$exam" == "ckad2026" ]]; then
+        questions_file="${SCRIPT_DIR}/questions-ckad2026-${lang}.md"
+    else
+        questions_file="${SCRIPT_DIR}/questions-${lang}.md"
+    fi
     if [[ ! -f "$questions_file" ]]; then
         echo -e "${RED}Questions file not found: ${questions_file}${NC}"
         return 1
@@ -344,8 +413,8 @@ case "${1:-}" in
     start)     shift; cmd_start "$@" ;;
     status)    cmd_status ;;
     timer)     cmd_timer ;;
-    evaluate)  cmd_evaluate ;;
-    end)       cmd_end ;;
+    evaluate)  shift; cmd_evaluate "$@" ;;
+    end)       shift; cmd_end "$@" ;;
     reset)     cmd_reset ;;
     questions) shift; cmd_questions "$@" ;;
     help|--help|-h) usage ;;
