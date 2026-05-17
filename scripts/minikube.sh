@@ -70,16 +70,27 @@ cmd_disable_k() {
 
 cmd_start() {
   echo "Inicializando Minikube..."
-  minikube start --driver=docker --kubernetes-version=v1.33.0
+
+  CURRENT_VERSION=$(kubectl version --short 2>/dev/null | grep "Server Version" | awk '{print $3}' || true)
+
+  if [ -n "$CURRENT_VERSION" ]; then
+    echo "Usando versión existente: $CURRENT_VERSION"
+    minikube start --driver=docker --kubernetes-version="$CURRENT_VERSION"
+  else
+    minikube start --driver=docker --kubernetes-version=v1.33.0
+  fi
+
   kubectl cluster-info || true
+
   echo "Esperando a que el API Server esté disponible..."
   if kubectl wait --for=condition=Available --timeout=90s deployment/kube-apiserver -n kube-system 2>/dev/null; then
     :
   else
     kubectl get --raw='/readyz' >/dev/null 2>&1 || true
   fi
+
   cmd_enable_k
-  echo "Minikube iniciado correctamente." 
+  echo "Minikube iniciado correctamente."
 }
 
 cmd_stop() {

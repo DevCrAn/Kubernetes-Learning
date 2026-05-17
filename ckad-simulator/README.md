@@ -2,6 +2,8 @@
 
 Complete CKAD exam simulator with 25 questions, 2-hour timer, and automatic answer evaluation.
 
+Also includes an extended CKAD 2026 lab with 34 additional questions focused on real exam troubleshooting patterns.
+
 ## Quick Start
 
 ```bash
@@ -23,6 +25,25 @@ source ~/.ckad-env
 # 6. Reset for retry
 ./cleanup-ckad-env.sh && ./setup-ckad-env.sh
 ```
+
+## Extended CKAD 2026 Lab (34 Questions)
+
+```bash
+# 1. Setup extended lab resources and files under /ckad and /opt
+./setup-more-ckad2026-env.sh
+source ~/.ckad-env
+
+# 2. Practice with the English question bank
+less more-questions-ckad2026-en.md
+
+# 3. Reset extended lab
+./cleanup-more-ckad2026-env.sh && ./setup-more-ckad2026-env.sh
+```
+
+Notes:
+- This extended flow is intentionally separate from the original 25-question exam-runner flow.
+- It seeds broken scenarios commonly seen in CKAD troubleshooting tasks (Ingress, RBAC, probes, image issues).
+- Primary setup manifest: `resources/ckad2026-more-resources.yaml`.
 
 ## What the Setup Creates
 
